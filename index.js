@@ -1,32 +1,18 @@
 import express from 'express'
 import morgan from 'morgan'
+import cors from 'cors'
+import { writeFileSync } from 'node:fs'
+import personsData from './db.json' with { type: 'json' }
 
 const app = express()
-
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-}
-]
+const db = './db.json'
+let persons = personsData
 
 app.use(express.json())
+
+app.use(express.static('dist'))
+
+app.use(cors())
 
 const logger = (tokens, req, res)=>{
   return [
@@ -54,7 +40,7 @@ app.get('/api/persons/:id',(req,res)=>{
     return res.json(person)
 })
 
-app.post('/api/persons', (req,res)=>{
+app.post('/api/persons',  (req,res)=>{
     const body = req.body
     if(!body.name || !body.number){
         return res.status(400).json({error:'number or name missing'})
@@ -68,6 +54,7 @@ app.post('/api/persons', (req,res)=>{
         number : body.number
     }
     persons = persons.concat(person)
+    writeFileSync(db, JSON.stringify(persons, null, 2))
 
     return res.json(person)
 })
@@ -79,7 +66,8 @@ app.delete('/api/persons/:id',(req,res)=>{
         return res.status(404).json({error: "Person not found"})
     }
     persons = persons.filter(p => p.id !== id)
-    return res.status(204).end()
+    writeFileSync(db,JSON.stringify(persons, null, 2))
+    return res.status(200).json(person)
 })
 
 app.get('/info',(req,res)=>{
