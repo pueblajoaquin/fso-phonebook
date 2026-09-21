@@ -10,8 +10,6 @@ let persons = personsData
 
 app.use(express.json())
 
-app.use(express.static('dist'))
-
 app.use(cors())
 
 const logger = (tokens, req, res)=>{
