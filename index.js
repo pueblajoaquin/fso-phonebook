@@ -8,9 +8,11 @@ const app = express()
 const db = './db.json'
 let persons = personsData
 
+app.use(cors())
+
 app.use(express.json())
 
-app.use(cors())
+
 
 const logger = (tokens, req, res)=>{
   return [
