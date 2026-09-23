@@ -6,9 +6,9 @@ import Person from './models/person.js'
 
 const app = express()
 
-app.use(cors())
-
 app.use(express.static('dist'))
+
+app.use(cors())
 
 app.use(express.json())
 
@@ -33,11 +33,14 @@ app.get('/api/persons',(req,res)=>{
         })
 })
 
-app.get('/api/persons/:id',(req,res)=>{
+app.get('/api/persons/:id',(req,res, next)=>{
     Person
         .findById(req.params.id)
         .then(person => {
             res.json(person)
+        })
+        .catch(error => {
+            next(error)
         })
 })
 
@@ -60,24 +63,60 @@ app.post('/api/persons',  (req,res)=>{
 
 })
 
-//app.delete('/api/persons/:id',(req,res)=>{
-//    const id = Number(req.params.id)
-//    const person = persons.find(p => p.id === id)
-//    if(!person){
-//        return res.status(404).json({error: "Person not found"})
-//    }
-//    persons = persons.filter(p => p.id !== id)
-//    writeFileSync(db,JSON.stringify(persons, null, 2))
-//    return res.status(200).json(person)
-//})
+app.put('/api/persons/:id', (req,res, next) => {
+    const body = req.body
+    const person = {
+        name : body.name,
+        number : body.number
+    }
+
+    Person
+        .findByIdAndUpdate(req.params.id, person, {new:true})
+        .then(updatedPerson => {
+            res.status(200).json(updatedPerson)
+        })
+        .catch(err =>{
+            next(err)
+        })
+})
+
+app.delete('/api/persons/:id',(req,res, next)=>{
+    Person
+        .findByIdAndDelete(req.params.id)
+        .then(result => {
+            if(result){
+                res.status(200).json(result)
+            }else{
+                res.status(204).end()
+            }
+        })
+        .catch(err => {
+            next(err)
+        })
+})
 
 app.get('/info',(req,res)=>{
     const date = new Date()
-    res.send(`<p>Phonebook has info for ???? people</p><p>${date.toString()}</p>`)
+    Person
+        .countDocuments({})
+        .then(cantDocuments => {
+            res.send(`<p>Phonebook has info for ${cantDocuments} people</p><p>${date.toString()}</p>`)
+        })
+    
 })
 
+const errorHandler = (err, req, res, next) => {
+    console.log(err.message)
+    if(err.name === 'CastError'){
+        return res.status(400).send({error:'malformated id'})
+    }
+    next(err)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, ()=>{
 console.log(`server running on port http://localhost:${PORT}`)
 })
+
