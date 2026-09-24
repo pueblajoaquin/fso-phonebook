@@ -72,9 +72,13 @@ app.put('/api/persons/:id', (req,res, next) => {
     }
 
     Person
-        .findByIdAndUpdate(req.params.id, person, {new:true, runValidator:true,context: 'query'})
+        .findByIdAndUpdate(req.params.id, person, {new:true, runValidators:true,context: 'query'})
         .then(updatedPerson => {
-            res.status(200).json(updatedPerson)
+            if(updatedPerson){
+                res.status(200).json(updatedPerson)
+            }else {
+                res.status(404).end()
+            }
         })
         .catch(err =>{
             next(err)
@@ -88,7 +92,7 @@ app.delete('/api/persons/:id',(req,res, next)=>{
             if(result){
                 res.status(200).json(result)
             }else{
-                res.status(204).end()
+                res.status(404).end()
             }
         })
         .catch(err => {
