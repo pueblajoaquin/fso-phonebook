@@ -1,7 +1,7 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 import dns from 'node:dns'
 
-dns.setServers(["8.8.8.8"])
+dns.setServers(['8.8.8.8'])
 
 mongoose.set('strictQuery', false)
 
@@ -10,9 +10,8 @@ const url = process.env.MONGODB_URI
 console.log('conecting to data base... \n')
 
 mongoose.connect(url)
-    .then( result => console.log('connected to MongoDB'))
-    .catch( err => console.log('error connecting to MongoDB:', err.message))
-
+  .then(result => console.log('connected to MongoDB'))
+  .catch(err => console.log('error connecting to MongoDB:', err.message))
 
 const personSchema = new mongoose.Schema({
   name: {
@@ -20,7 +19,7 @@ const personSchema = new mongoose.Schema({
     minLength: 3,
     required: true
   },
-  number:{
+  number: {
     type: String,
     required: true,
     minLength: 8,
@@ -39,4 +38,4 @@ personSchema.set('toJSON', {
   }
 })
 
-export default mongoose.model('Person',personSchema)
+export default mongoose.model('Person', personSchema)
